@@ -1,0 +1,18 @@
+/* styles.css */
+
+:root {
+    --prince-purple: #6a0dad;
+    --prince-yellow: #ffda03;
+    --prince-black: #000000;
+  }
+  
+  body {
+    background-color: var(--prince-purple);
+    color: var(--prince-yellow);
+  }
+  
+  header, footer {
+    background-color: var(--prince-black);
+    color: var(--prince-yellow);
+  }
+  

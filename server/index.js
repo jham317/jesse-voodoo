@@ -1,22 +1,28 @@
-const port = 4000;
-app.use(function (req, res, next) {
-    res.header(
-      'Access-Control-Allow-Methods',
-      'OPTIONS, HEAD, GET, PUT, POST, DELETE'
-    );
-    res.header(
-      'Access-Control-Allow-Headers',
-      'Origin, X-Requested-With, Content-Type, Accept'
-    );
-    next();
+const dotenv = require('dotenv');
+dotenv.config();
+
+const express = require('express');
+const cors = require('cors');
+const { connectToDatabase } = require('./Database/database');
+const artistRoutes = require('./Controllers/artistsController');
+const musicRoutes = require('./Controllers/musicController');
+const trackRoutes = require('./Controllers/tracksController');
+const app = express();
+const port = process.env.PORT || 4000;
+
+app.use(cors());
+app.use(express.json());
+
+connectToDatabase()
+  .then((database) => {
+    app.use('/artists', artistRoutes);
+    app.use('/music', musicRoutes);
+    app.use('/tracks', trackRoutes);
+
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+    });
   })
-app.use(express.json())
-app.use(express.urlencoded({ extended: false }))
-
-  useEffect(() => {
-    fetch('/bacon')
-      .then((res) => res.json())
-      .then((data) => console.log(data));
-  }, []);
-
-app.get('/bacon', (req, res) => res.status(200).json('🥓'));
+  .catch((error) => {
+    console.error('Failed to connect to the database:', error);
+  });
