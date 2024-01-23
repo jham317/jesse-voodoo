@@ -7,7 +7,7 @@ async function connectToDatabase() {
   try {
     const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
     await client.connect();
-    const database = client.db('your-database-name'); // Replace with your actual database name
+    const database = client.db('Voodoo'); // Replace with your actual database name
 
     console.log('Connected to the database successfully');
 
