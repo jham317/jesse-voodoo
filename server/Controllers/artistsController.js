@@ -3,27 +3,55 @@ const axios = require('axios');
 const { getSpotifyAccessToken } = require('../spotifyAuth');
 const app = express();
 
-// Route handler for fetching artist information by ID
-app.get('/:id', async (req, res) => {
+// Reusable function to make Spotify API requests
+async function fetchSpotifyData(endpoint, accessToken) {
   try {
-    // Get the artist ID from the request parameters
-    const artistId = req.params.id;
+    const response = await axios.get(endpoint, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+}
 
-    // Get the Spotify access token
+// Route handler for searching artists by name
+app.get('/search', async (req, res) => {
+  try {
+    const searchQuery = req.query.query;
+    // Check if the query parameter is received correctly
+    console.log('Search Query:', searchQuery); 
     const accessToken = await getSpotifyAccessToken();
 
-    // Spotify API endpoint URL for fetching artist information by ID
-    const spotifyApiUrl = `https://api.spotify.com/v1/artists/${artistId}`;
-
-    // Make the API request to Spotify with the access token in the Authorization header
-    const response = await axios.get(spotifyApiUrl, {
+    const spotifySearchUrl = `https://api.spotify.com/v1/search?q=${searchQuery}&type=artist`;
+    const searchResponse = await axios.get(spotifySearchUrl, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
 
-    // Extract and send the artist data in the response
-    const artistData = response.data;
+    const artistResults = searchResponse.data.artists.items;
+
+    if (artistResults.length === 0) {
+      res.status(200).json({ message: 'No artists found' });
+    } else {
+      res.status(200).json(artistResults);
+    }
+  } catch (error) {
+    console.error('Error searching for artists:', error);
+    res.status(500).json({ error: 'Failed to search for artists' });
+  }
+});
+
+// Route handler for fetching artist information by ID
+app.get('/:id', async (req, res) => {
+  try {
+    const artistId = req.params.id;
+    const accessToken = await getSpotifyAccessToken();
+    const spotifyApiUrl = `https://api.spotify.com/v1/artists/${artistId}`;
+    const artistData = await fetchSpotifyData(spotifyApiUrl, accessToken);
 
     res.status(200).json(artistData);
   } catch (error) {
@@ -35,24 +63,10 @@ app.get('/:id', async (req, res) => {
 // Route handler for fetching artist's albums by ID
 app.get('/:id/albums', async (req, res) => {
   try {
-    // Get the artist ID from the request parameters
     const artistId = req.params.id;
-
-    // Get the Spotify access token
     const accessToken = await getSpotifyAccessToken();
-
-    // Spotify API endpoint URL for fetching artist's albums by ID
     const spotifyApiUrl = `https://api.spotify.com/v1/artists/${artistId}/albums`;
-
-    // Make the API request to Spotify with the access token in the Authorization header
-    const response = await axios.get(spotifyApiUrl, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    // Extract and send the artist's albums data in the response
-    const artistAlbumsData = response.data;
+    const artistAlbumsData = await fetchSpotifyData(spotifyApiUrl, accessToken);
 
     res.status(200).json(artistAlbumsData);
   } catch (error) {
@@ -64,24 +78,10 @@ app.get('/:id/albums', async (req, res) => {
 // Route handler for fetching artist's top tracks by ID
 app.get('/:id/top-tracks', async (req, res) => {
   try {
-    // Get the artist ID from the request parameters
     const artistId = req.params.id;
-
-    // Get the Spotify access token
     const accessToken = await getSpotifyAccessToken();
-
-    // Spotify API endpoint URL for fetching artist's top tracks by ID
-    const spotifyApiUrl = `https://api.spotify.com/v1/artists/${artistId}/top-tracks?country=US`; // Added country parameter
-
-    // Make the API request to Spotify with the access token in the Authorization header
-    const response = await axios.get(spotifyApiUrl, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    // Extract and send the artist's top tracks data in the response
-    const artistTopTracksData = response.data;
+    const spotifyApiUrl = `https://api.spotify.com/v1/artists/${artistId}/top-tracks?country=US`;
+    const artistTopTracksData = await fetchSpotifyData(spotifyApiUrl, accessToken);
 
     res.status(200).json(artistTopTracksData);
   } catch (error) {

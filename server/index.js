@@ -2,6 +2,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 const express = require('express');
 const cors = require('cors');
+const morgan = require('morgan');
 const { connectToDatabase } = require('./Database/database');
 const artistRoutes = require('./Controllers/artistsController');
 const musicRoutes = require('./Controllers/musicController');
@@ -14,6 +15,7 @@ const port = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(express.json());
+app.use(morgan('dev'));
 
 connectToDatabase()
   .then(async (database) => {
