@@ -58,6 +58,7 @@ router.get('/search', async (req, res) => {
   
 
 // Route handler for fetching album information by ID
+// Route handler for fetching album information by ID
 router.get('/:id', async (req, res) => {
   try {
     const albumId = req.params.id;
@@ -65,14 +66,19 @@ router.get('/:id', async (req, res) => {
     const spotifyApiUrl = `https://api.spotify.com/v1/albums/${albumId}`;
     const albumData = await fetchSpotifyData(spotifyApiUrl, accessToken);
 
+    // Check if the album has artists associated with it
+    if (albumData.artists && albumData.artists.length > 0) {
+      const artistId = albumData.artists[0].id; // Assuming the first artist in the list
+      const artistInfo = await fetchSpotifyData(`https://api.spotify.com/v1/artists/${artistId}`, accessToken);
+      albumData.artistName = artistInfo ? artistInfo.name : 'Unknown Artist';
+    }
+
     res.status(200).json(albumData);
   } catch (error) {
     console.error('Error fetching album data from Spotify:', error);
     res.status(500).json({ error: 'Failed to fetch album data from Spotify' });
   }
 });
-
-
 // Route handler for fetching tracks of an album by ID
 router.get('/:id/tracks', async (req, res) => {
   try {
