@@ -5,7 +5,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const { connectToDatabase } = require('./Database/database');
 const artistRoutes = require('./Controllers/artistsController');
-const musicRoutes = require('./Controllers/musicController');
+const albumController = require('./Controllers/albumController');
 const trackRoutes = require('./Controllers/tracksController');
 const { insertDataIntoCollection } = require('./Database/insertCollections');
 const fs = require('fs');
@@ -53,7 +53,7 @@ connectToDatabase()
 
     // Use other routes as needed (e.g., artistRoutes, musicRoutes, trackRoutes)
     app.use('/artists', artistRoutes);
-    app.use('/music', musicRoutes);
+    app.use('/albums', albumController);
     app.use('/tracks', trackRoutes);
 
     app.listen(port, () => {

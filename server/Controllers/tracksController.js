@@ -3,32 +3,58 @@ const axios = require('axios');
 const { getSpotifyAccessToken } = require('../spotifyAuth');
 const app = express();
 
-// Route handler for fetching track information by ID
-app.get('/:id', async (req, res, next) => {
+// Reusable function to make Spotify API requests
+async function fetchSpotifyData(endpoint, accessToken) {
   try {
-    // Get the track ID from the request parameters
-    const trackId = req.params.id;
+    const response = await axios.get(endpoint, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+}
 
-    // Get the Spotify access token
+// Route handler for searching tracks by name
+app.get('/search', async (req, res) => {
+  try {
+    const searchQuery = req.query.query;
     const accessToken = await getSpotifyAccessToken();
 
-    // Spotify API endpoint URL for fetching track information by ID
-    const spotifyApiUrl = `https://api.spotify.com/v1/tracks/${trackId}`;
-
-    // Make the API request to Spotify with the access token in the Authorization header
-    const response = await axios.get(spotifyApiUrl, {
+    const spotifySearchUrl = `https://api.spotify.com/v1/search?q=${searchQuery}&type=track`;
+    const searchResponse = await axios.get(spotifySearchUrl, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
 
-    // Extract and send the track data in the response
-    const trackData = response.data;
+    const tracks = searchResponse.data.tracks.items;
+
+    if (tracks.length === 0) {
+      res.status(200).json({ message: 'No tracks found' });
+    } else {
+      res.status(200).json(tracks);
+    }
+  } catch (error) {
+    console.error('Error searching for tracks:', error);
+    res.status(500).json({ error: 'Failed to search for tracks' });
+  }
+});
+
+// Route handler for fetching track information by ID
+app.get('/:id', async (req, res) => {
+  try {
+    const trackId = req.params.id;
+    const accessToken = await getSpotifyAccessToken();
+    const spotifyApiUrl = `https://api.spotify.com/v1/tracks/${trackId}`;
+    const trackData = await fetchSpotifyData(spotifyApiUrl, accessToken);
 
     res.status(200).json(trackData);
   } catch (error) {
-    // Pass the error to the error handling middleware
-    next(error);
+    console.error('Error fetching track data from Spotify:', error);
+    res.status(500).json({ error: 'Failed to fetch track data from Spotify' });
   }
 });
 

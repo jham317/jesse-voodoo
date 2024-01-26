@@ -21,8 +21,7 @@ async function fetchSpotifyData(endpoint, accessToken) {
 app.get('/search', async (req, res) => {
   try {
     const searchQuery = req.query.query;
-    // Check if the query parameter is received correctly
-    console.log('Search Query:', searchQuery); 
+    console.log('Search query:', searchQuery); 
     const accessToken = await getSpotifyAccessToken();
 
     const spotifySearchUrl = `https://api.spotify.com/v1/search?q=${searchQuery}&type=artist`;
@@ -39,7 +38,7 @@ app.get('/search', async (req, res) => {
     } else {
       res.status(200).json(artistResults);
     }
-  } catch (error) {
+    } catch (error) {
     console.error('Error searching for artists:', error);
     res.status(500).json({ error: 'Failed to search for artists' });
   }
@@ -75,19 +74,6 @@ app.get('/:id/albums', async (req, res) => {
   }
 });
 
-// Route handler for fetching artist's top tracks by ID
-app.get('/:id/top-tracks', async (req, res) => {
-  try {
-    const artistId = req.params.id;
-    const accessToken = await getSpotifyAccessToken();
-    const spotifyApiUrl = `https://api.spotify.com/v1/artists/${artistId}/top-tracks?country=US`;
-    const artistTopTracksData = await fetchSpotifyData(spotifyApiUrl, accessToken);
 
-    res.status(200).json(artistTopTracksData);
-  } catch (error) {
-    console.error('Error fetching artist top tracks from Spotify:', error);
-    res.status(500).json({ error: 'Failed to fetch artist top tracks from Spotify' });
-  }
-});
 
 module.exports = app;
