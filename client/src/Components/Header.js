@@ -1,10 +1,13 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Header = () => {
   return (
-    <header style={{ backgroundColor: 'var(--prince-black)', color: 'var(--prince-yellow)' }}>
-      <h1>Voodoo</h1>
-    </header>
+    <Link to="/" style={{ textDecoration: 'none', color: 'var(--prince-yellow)' }}>
+      <h1 style={{ fontFamily: 'Sniglet, cursive', textAlign: 'center', fontSize: '7rem' }}>
+        Voodoo
+      </h1>
+    </Link>
   );
 };
 
