@@ -19,7 +19,7 @@ const styles = {
   },
   trackItem: {
     padding: '10px 0',
-    borderBottom: '1px solid #ccc',
+    borderBottom: '2px solid #ccc',
   },
 };
 
@@ -71,7 +71,7 @@ function AlbumsPage() {
       <h1>Album Details</h1>
       <h2>{albumDetails.name}</h2>
       <p>
-        Artist: <Link to={`/artist/${artistId}`}>{albumDetails.artist}</Link>
+        Artist: <Link to={`/artist/${artistId}`} style={{ color: 'var(--prince-yellow)' }}>{albumDetails.artist}</Link>
       </p>
       <p>Release Date: {albumDetails.releaseDate}</p>
       <img src={albumDetails.imageUrl} alt={`Cover for ${albumDetails.name}`} style={styles.albumImage} />
@@ -80,7 +80,7 @@ function AlbumsPage() {
       <ul style={styles.tracklist}>
         {tracklist.map((track) => (
           <li key={track.id} style={styles.trackItem}>
-            <Link to={`/track/${track.id}`}>{track.name}</Link>
+            <Link to={`/track/${track.id}`} style={{ color: 'var(--prince-yellow)' }}>{track.name}</Link>
           </li>
         ))}
       </ul>

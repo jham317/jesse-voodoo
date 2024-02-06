@@ -1,5 +1,5 @@
 const fs = require('fs');
-const ratingsDataPath = './database/ratings.json';
+const ratingsDataPath = './Database/ratings.json';
 
 function readRatingsData() {
   const data = fs.readFileSync(ratingsDataPath);

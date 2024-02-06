@@ -30,7 +30,7 @@ function TrackPage() {
       .get(`/tracks/${trackId}`)
       .then((response) => {
         setTrackInfo(response.data);
-        // Once you have the track data, fetch album information
+        // track data, fetch album information
         const albumId = response.data.album.id;
         axios
           .get(`/albums/${albumId}`)
@@ -68,7 +68,7 @@ function TrackPage() {
         <p><strong>Album:</strong> <Link to={`/albums/${albumInfo.id}`}>{albumInfo.name}</Link></p>
       )}
 
-      {/* You can add more track details here */}
+      {/*  add more track details here */}
     </div>
   );
 }

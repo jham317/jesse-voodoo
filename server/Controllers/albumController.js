@@ -19,7 +19,6 @@ async function fetchSpotifyData(endpoint, accessToken) {
 }
 
 // Route handler for searching albums by name
-// Route handler for searching albums by name
 router.get('/search', async (req, res) => {
   try {
     const searchQuery = encodeURIComponent(req.query.query);
@@ -71,10 +70,10 @@ router.get('/:id', async (req, res) => {
 
   // Check if the album has artists associated with it
 if (albumData.artists && albumData.artists.length > 0) {
-  // Access the first artist's name (assuming the first artist)
+  // Access the first artist's name 
   albumData.artistName = albumData.artists[0].name;
 } else {
-  // If no artists are associated with the album, you can set a default value
+  // If no artists are associated with the album, set a default value
   albumData.artistName = 'Unknown Artist';
 }
 

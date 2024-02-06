@@ -1,7 +1,49 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+
+const styles = {
+  container: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '1rem',
+    background: 'var(--prince-purple)', // Background color for the navigation bar
+    color: 'white',
+    position: 'fixed', // Fix the navigation bar at the top
+    top: 0, // Position it at the top of the viewport
+    width: '100%', // Make it full width
+    borderRadius: '0 0 20px 20px', // Rounded bottom corners
+  },
+ 
+  loginButtonContainer: {
+    marginRight: 'auto', // Move the login button to the right
+  },
+  loginButton: {
+  
+    textDecoration: 'none',
+    backgroundColor: 'var(--prince-purple)',
+    fontFamily: 'Sniglet, cursive', // Use custom font
+    color: 'white',
+    padding: '1rem 2rem',
+    borderRadius: '20px',
+    fontSize: '1.8rem',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s ease',
+  },
+  
+};
 
 const NavBar = () => {
-  return <div></div>;
+  return (
+    <div style={styles.container}>
+
+      <div style={styles.loginButtonContainer}>
+        <Link to="/login" style={styles.loginButton} className="login-button">
+          Login
+        </Link>
+      </div>
+    </div>
+  );
 };
 
 export default NavBar;

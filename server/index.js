@@ -9,6 +9,8 @@ const albumController = require('./Controllers/albumController');
 const trackRoutes = require('./Controllers/tracksController');
 const { insertDataIntoCollection } = require('./Database/insertCollections');
 const fs = require('fs');
+const { loginUser, signupUser } = require('./Handlers/userHandler');
+
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -41,6 +43,9 @@ connectToDatabase()
     // Set up routes for each collection using the appropriate handlers
     app.get('/users', getAllUsers);
     app.post('/users', createUser);
+    app.post('/users/login', loginUser);
+    app.post('/users/signup', signupUser); // Assuming signupUser is your signup handler function
+
 
     app.get('/ratings', getAllRatings);
     app.post('/ratings', createRating);

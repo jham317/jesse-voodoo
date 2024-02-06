@@ -1,5 +1,5 @@
 const fs = require('fs');
-const userProfilesDataPath = './database/userProfiles.json';
+const userProfilesDataPath = './Database/userProfiles.json';
 
 // Helper function to read user profiles data from JSON file
 function readUserProfilesData() {
