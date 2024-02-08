@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { BiShow, BiHide } from "react-icons/bi";
+import axios from 'axios'; //
 
 const styles = {
   container: {
@@ -8,6 +10,8 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     height: '60vh',
+    fontFamily: 'Poppins, sans-serif', // Use Poppins as the primary font
+
   },
   form: {
     width: '300px',
@@ -16,6 +20,8 @@ const styles = {
     borderRadius: '10px',
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
     backgroundColor: 'white',
+    fontFamily: 'Poppins, sans-serif', // Use Poppins as the primary font
+
   },
   input: {
     marginBottom: '10px',
@@ -32,14 +38,16 @@ const styles = {
     border: 'none',
     borderRadius: '5px',
     cursor: 'pointer',
+    fontFamily: 'Poppins, sans-serif', // Use Poppins as the primary font
+
   },
 };
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
-  const [loading, setLoading] = useState(false); // State for loading indicator
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -47,27 +55,26 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
+      // Using axios for consistency with the RatingForm example
+      const response = await axios.post('/login', {
+        username,
+        password,
       });
 
       if (response.status === 200) {
+        // Store the token in localStorage or sessionStorage
+        localStorage.setItem('token', response.data.token);
+
         // Authentication successful, redirect to the main content or user profile
-        navigate('/home'); // Use the navigate function to redirect
-      } else if (response.status === 401) {
-        // Authentication failed, display an error message
-        console.log('Authentication failed. Invalid username or password.');
+        navigate('/home');
       } else {
-        // Handle other response statuses (e.g., server errors)
-        console.log('An error occurred. Please try again later.');
+        // Handle failed login attempt
+        console.log('Authentication failed. Invalid username or password.');
       }
     } catch (error) {
-      // Handle any network or server errors
+      // Handle any errors
       console.error('An error occurred:', error);
+      alert('Login failed: ' + (error.response?.data || 'Please try again later.'));
     } finally {
       setLoading(false);
     }
@@ -87,31 +94,32 @@ const Login = () => {
             required
           />
         </div>
-        <div>
+        <div style={{ position: 'relative', width: '100%' }}>
           <input
-            style={styles.input}
+            style={{ ...styles.input, paddingRight: '30px' }}
             type={showPassword ? 'text' : 'password'}
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <button
-            type="button"
+          <div
             onClick={() => setShowPassword(!showPassword)}
+            style={{
+              position: 'absolute',
+              top: '50%',
+              right: '10px',
+              transform: 'translateY(-50%)',
+              color: '#007BFF',
+              cursor: 'pointer',
+            }}
           >
-            {showPassword ? 'Hide' : 'Show'} Password
-          </button>
+            {showPassword ? <BiHide /> : <BiShow />}
+          </div>
         </div>
-        <div>
-          <button
-            style={styles.button}
-            type="submit"
-            disabled={loading}
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </div>
+        <button style={styles.button} type="submit" disabled={loading}>
+          {loading ? 'Logging in...' : 'Login'}
+        </button>
       </form>
       <p>
         Don't have an account? <Link to="/signup">Sign Up</Link>

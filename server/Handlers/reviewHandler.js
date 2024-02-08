@@ -1,42 +1,33 @@
-const fs = require('fs');
-const reviewsDataPath = './database/reviews.json';
+const { ObjectId } = require('mongodb');
+const { connectToDatabase } = require('../Database/database');
 
-// Helper function to read reviews data from JSON file
-function readReviewsData() {
-  const data = fs.readFileSync(reviewsDataPath);
-  return JSON.parse(data);
-}
+exports.postReview = async (req, res) => {
+    const { albumId, reviewText, rating } = req.body;
+    // Assuming the JWT middleware has added the user info to req.user
+    const userId = req.user.userId;
 
-// Helper function to write reviews data to JSON file
-function writeReviewsData(reviews) {
-  fs.writeFileSync(reviewsDataPath, JSON.stringify(reviews, null, 2));
-}
+    // Validate input
+    if (!albumId || rating === undefined) {
+        return res.status(400).send('Album ID and rating are required.');
+    }
 
-// Get all reviews
-function getAllReviews(req, res) {
-  const reviews = readReviewsData();
-  res.json(reviews);
-}
+    try {
+        const db = await connectToDatabase();
+        const reviewsCollection = db.collection('reviews');
 
-// Create a new review
-function createReview(req, res) {
-  const reviews = readReviewsData();
-  const newReview = {
-    userId: req.body.userId || '',
-    trackId: req.body.trackId || '',
-    albumId: req.body.albumId || '',
-    title: req.body.title || '',
-    content: req.body.content || '',
-    createdAt: new Date(),
-  };
+        // Insert the review into the database
+        const review = {
+            albumId,
+            userId: new ObjectId(userId), // Ensure userId matches the type stored in your database
+            reviewText,
+            rating,
+            createdAt: new Date(),
+        };
+        await reviewsCollection.insertOne(review);
 
-  reviews.push(newReview);
-  writeReviewsData(reviews);
-
-  res.status(201).json(newReview);
-}
-
-module.exports = {
-  getAllReviews,
-  createReview,
+        res.status(201).send('Review added successfully.');
+    } catch (error) {
+        console.error('Failed to post review:', error);
+        res.status(500).send('Server error: ' + error.message);
+    }
 };

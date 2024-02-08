@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FaStar } from "react-icons/fa";
 
 const styles = {
   container: {
@@ -14,12 +15,11 @@ const styles = {
     width: '100%', // Make it full width
     borderRadius: '0 0 20px 20px', // Rounded bottom corners
   },
- 
+
   loginButtonContainer: {
     marginRight: 'auto', // Move the login button to the right
   },
   loginButton: {
-  
     textDecoration: 'none',
     backgroundColor: 'var(--prince-purple)',
     fontFamily: 'Sniglet, cursive', // Use custom font
@@ -30,16 +30,21 @@ const styles = {
     cursor: 'pointer',
     transition: 'background-color 0.3s ease',
   },
-  
 };
 
 const NavBar = () => {
   return (
     <div style={styles.container}>
-
       <div style={styles.loginButtonContainer}>
         <Link to="/login" style={styles.loginButton} className="login-button">
           Login
+        </Link>
+      </div>
+      <div>
+        {/* Add a link to the Ratings page */}
+        <Link to="/ratings" style={styles.loginButton} className="ratings-button">
+          <FaStar />
+          Ratings
         </Link>
       </div>
     </div>

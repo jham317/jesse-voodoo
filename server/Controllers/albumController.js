@@ -4,7 +4,6 @@ const axios = require('axios');
 const { getSpotifyAccessToken } = require('../spotifyAuth');
 const router = express.Router();
 
-// Reusable function to make Spotify API requests
 async function fetchSpotifyData(endpoint, accessToken) {
   try {
     const response = await axios.get(endpoint, {

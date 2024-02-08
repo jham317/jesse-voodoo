@@ -1,6 +1,6 @@
-// Signup.js
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const styles = {
   container: {
@@ -9,6 +9,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     height: '60vh',
+    fontFamily: 'Poppins, sans-serif',
   },
   form: {
     width: '300px',
@@ -38,7 +39,7 @@ const styles = {
 
 const Signup = () => {
   const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(''); // Note: Your AuthHandler.js doesn't use email. If you intend to use it, adjust the server-side code accordingly.
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const navigate = useNavigate();
@@ -47,28 +48,25 @@ const Signup = () => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      console.log("Passwords do not match");
+      alert("Passwords do not match.");
       return;
     }
 
     try {
-      const response = await fetch('/users/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, email, password }),
+      const response = await axios.post('/register', {
+        username,
+        password, // Email is not used in your AuthHandler.js. Include it if your backend supports it.
       });
 
       if (response.status === 201) {
-        navigate('/login');
-      } else if (response.status === 400) {
-        console.log('Signup failed. Username or email already exists.');
+        alert('Signup successful!');
+        navigate('/login'); // Redirect user to login page after successful signup
       } else {
-        console.log('An error occurred. Please try again later.');
+        alert('Signup failed. Please try again.');
       }
     } catch (error) {
       console.error('An error occurred:', error);
+      alert('Signup failed: ' + (error.response?.data || 'Please try again later.'));
     }
   };
 
@@ -76,46 +74,30 @@ const Signup = () => {
     <div style={styles.container}>
       <form style={styles.form} onSubmit={handleSignup}>
         <h2>Sign Up</h2>
-        <div>
-          <label>Username</label>
-          <input
-            style={styles.input}
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Email</label>
-          <input
-            style={styles.input}
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Password</label>
-          <input
-            style={styles.input}
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Confirm Password</label>
-          <input
-            style={styles.input}
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-          />
-        </div>
+        <input
+          style={styles.input}
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+        <input
+          style={styles.input}
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <input
+          style={styles.input}
+          type="password"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+        />
         <button style={styles.button} type="submit">
           Sign Up
         </button>

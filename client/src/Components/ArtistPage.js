@@ -6,29 +6,60 @@ const styles = {
   container: {
     textAlign: 'center',
     padding: '20px',
+    fontSize: '30px',
+    color: '#fff', // White text for better contrast against purple
+    fontFamily: 'Poppins, sans-serif', // Use Poppins as the primary font
+    
   },
   artistImage: {
-    width: '200px',
-    height: '200px',
-    borderRadius: '50%', // Circular image for artist
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    width: '300px',
+    height: '300px',
+    borderRadius: '50%',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+    marginBottom: '20px',
   },
   albumList: {
-    listStyle: 'none',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', // Creates a responsive grid
+    gap: '20px', // Space between grid items
     padding: '0',
+    marginTop: '20px',
   },
   albumItem: {
     display: 'flex',
-    alignItems: 'center',
-    marginBottom: '10px',
+    flexDirection: 'column', // Stack image and text vertically
+    alignItems: 'center', // Center-align the content
+    marginBottom: '15px',
+    borderRadius: '10px',
+    backgroundColor: '#6a0dad', // Maintain purple background for consistency
+    color: '#fff', // Ensure album name is visible against purple
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    padding: '10px',
   },
   albumImage: {
-    width: '50px',
-    height: '50px',
+    width: '100%', // Make images larger and responsive within their containers
+    height: 'auto', // Maintain aspect ratio
     borderRadius: '5px',
-    marginRight: '10px',
   },
+  link: {
+    color: '#fff', // White text for links
+    textDecoration: 'none',
+    marginTop: '10px', // Space between image and album name
+  },
+  button: {
+    padding: '10px 20px',
+    backgroundColor: '#007bff',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontFamily: 'Poppins, sans-serif',
+    marginTop: '20px',
+    fontSize: '16px',
+  },
+  
 };
+
 
 function ArtistPage() {
   const { id } = useParams();

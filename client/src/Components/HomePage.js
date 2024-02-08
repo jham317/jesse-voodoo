@@ -144,6 +144,8 @@ const styles = {
     background: 'linear-gradient(to bottom, var(--prince-purple), var(--prince-black))',
     padding: '2rem',
     marginTop: '10vh',
+    fontFamily: 'Poppins, sans-serif', // Use Poppins as the primary font
+
   },
   heading: {
     fontSize: '3rem',
@@ -159,8 +161,11 @@ const styles = {
     marginTop: '2rem',
     marginBottom: '1rem',
     background: 'rgba(106, 13, 173, 0.2)', // Lighter, semi-transparent purple
-    borderRadius: '100px',
-    padding: '0.5rem 2rem',    
+    borderRadius: '100px', 
+    border: '1px solid white', 
+    padding: '0.5rem 2rem', 
+    fontFamily: 'Poppins, sans-serif', // Use Poppins as the primary font
+   
   },
   select: {
     border: 'none',

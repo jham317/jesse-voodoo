@@ -1,70 +1,46 @@
-const dotenv = require('dotenv');
-dotenv.config();
 const express = require('express');
+const session = require('express-session');
 const cors = require('cors');
 const morgan = require('morgan');
+const dotenv = require('dotenv');
 const { connectToDatabase } = require('./Database/database');
 const artistRoutes = require('./Controllers/artistsController');
-const albumController = require('./Controllers/albumController');
+const albumRoutes = require('./Controllers/albumController');
 const trackRoutes = require('./Controllers/tracksController');
-const { insertDataIntoCollection } = require('./Database/insertCollections');
-const fs = require('fs');
-const { loginUser, signupUser } = require('./Handlers/userHandler');
+const { registerUser, loginUser } = require('./Handlers/AuthHandler');
+const { postReview } = require('./Handlers/ReviewHandler');
+const authenticateToken = require('./middleware/authenticateToken');
 
-
+dotenv.config();
 const app = express();
 const port = process.env.PORT || 4000;
+
 
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
+// Connect to the database
 connectToDatabase()
-  .then(async (database) => {
-    // Import and use handlers for user-related collections
-    const { getAllUsers, createUser } = require('./Handlers/userHandler');
-    const { getAllRatings, createRating } = require('./Handlers/ratingsHandler');
-    const { getAllReviews, createReview } = require('./Handlers/reviewHandler');
-    const { getAllUserProfiles, updateUserProfile } = require('./Handlers/userProfileHandler');
+  .then(async () => {
+    // Set up routes
 
-    // Import and insert data into each collection
-    const collectionsToInsert = [
-      { name: 'users', data: require('./Database/user.json') },
-      { name: 'ratings', data: require('./Database/ratings.json') },
-      { name: 'reviews', data: require('./Database/reviews.json') },
-      { name: 'userProfiles', data: require('./Database/userProfiles.json') },
-      // Add more collections as needed
-    ];
+    app.post('/register', registerUser);
+app.post('/login', loginUser);
 
-    for (const collectionInfo of collectionsToInsert) {
-      await insertDataIntoCollection(collectionInfo.name, collectionInfo.data);
-    }
+app.post('/reviews', authenticateToken, postReview);
 
-    // Set up routes for each collection using the appropriate handlers
-    app.get('/users', getAllUsers);
-    app.post('/users', createUser);
-    app.post('/users/login', loginUser);
-    app.post('/users/signup', signupUser); // Assuming signupUser is your signup handler function
-
-
-    app.get('/ratings', getAllRatings);
-    app.post('/ratings', createRating);
-
-    app.get('/reviews', getAllReviews);
-    app.post('/reviews', createReview);
-
-    app.get('/userProfiles', getAllUserProfiles);
-    app.put('/userProfiles/:userId', updateUserProfile);
-
-    // Use other routes as needed (e.g., artistRoutes, musicRoutes, trackRoutes)
+   
     app.use('/artists', artistRoutes);
-    app.use('/albums', albumController);
+    app.use('/albums', albumRoutes);
     app.use('/tracks', trackRoutes);
 
+    // Start the server
     app.listen(port, () => {
       console.log(`Server is running on port ${port}`);
     });
   })
   .catch((error) => {
     console.error('Failed to connect to the database:', error);
+    process.exit(1); // Exit the process if database connection fails
   });
