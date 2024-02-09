@@ -10,6 +10,8 @@ import TrackPage from './TrackPage';
 import Login from './Login'; // Import the Login component
 import Signup from './Signup'; // Import the Login component
 import NavBar from './NavBar'; 
+import UserReviewsPage from './UserReviewsPage'; // Import the UserReviewsPage component
+
 
 const AppRouter = () => {
   return (
@@ -25,6 +27,8 @@ const AppRouter = () => {
         <Route path="/artist/:id" element={<ArtistPage />} />
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/track/:id" Component={TrackPage} /> {/* Add the track route */}
+        <Route path="/user/reviews" element={<UserReviewsPage />} /> {/* Add route for user reviews */}
+
         {/* Add other routes here */}
       </Routes>
      

@@ -16,6 +16,18 @@ const styles = {
     borderRadius: '0 0 20px 20px', // Rounded bottom corners
   },
 
+  link: {
+    textDecoration: 'none',
+    color: 'white',
+    fontFamily: 'Sniglet, cursive',
+    padding: '0.5rem 2rem',
+    borderRadius: '10px',
+    display: 'flex',
+    alignItems: 'center',
+    marginRight: '10px', // Add some space between the icons if needed
+    fontSize: '1.5rem', // Adjust based on your design
+  },
+
   loginButtonContainer: {
     marginRight: 'auto', // Move the login button to the right
   },
@@ -40,13 +52,10 @@ const NavBar = () => {
           Login
         </Link>
       </div>
-      <div>
-        {/* Add a link to the Ratings page */}
-        <Link to="/ratings" style={styles.loginButton} className="ratings-button">
-          <FaStar />
-          Ratings
-        </Link>
-      </div>
+      {/* User Reviews Page Link */}
+      <Link to="/user/reviews" style={styles.link}>
+        <FaStar /> Reviews
+      </Link>
     </div>
   );
 };

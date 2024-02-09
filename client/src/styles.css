@@ -16,3 +16,7 @@
     color: var(--prince-yellow);
   }
   
+  .link:hover {
+    color: var(--prince-yellow); /* Use your defined --prince-yellow color */
+  }
+  

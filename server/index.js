@@ -8,8 +8,8 @@ const artistRoutes = require('./Controllers/artistsController');
 const albumRoutes = require('./Controllers/albumController');
 const trackRoutes = require('./Controllers/tracksController');
 const { registerUser, loginUser } = require('./Handlers/AuthHandler');
-const { postReview } = require('./Handlers/ReviewHandler');
 const authenticateToken = require('./middleware/authenticateToken');
+const { postReview, fetchUserReviews, updateReview, deleteReview } = require('./Handlers/ReviewHandler');
 
 dotenv.config();
 const app = express();
@@ -28,7 +28,11 @@ connectToDatabase()
     app.post('/register', registerUser);
 app.post('/login', loginUser);
 
+// Ensure these routes are added within the async function where you set up your server after connecting to the database
 app.post('/reviews', authenticateToken, postReview);
+app.get('/user/reviews', authenticateToken, fetchUserReviews);
+app.put('/reviews/:id', authenticateToken, updateReview); // Make sure updateReview is defined and exported
+app.delete('/reviews/:id', authenticateToken, deleteReview); // Make sure deleteReview is defined and exported
 
    
     app.use('/artists', artistRoutes);
