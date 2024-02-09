@@ -1,5 +1,91 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+const styles = {
+    container: {
+        padding: '20px',
+        fontFamily: 'Poppins, sans-serif',
+        color: '#fff',
+        background: 'linear-gradient(to bottom, #6a0dad, #9b59b6)',
+        minHeight: '100vh',
+    },
+    heading: {
+        textAlign: 'center',
+        fontSize: '2rem',
+        color: '#fff',
+    },
+    filterContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+        margin: '20px 0',
+    },
+    select: {
+        padding: '10px 20px',
+        border: '2px solid #fff',
+        borderRadius: '5px',
+        backgroundColor: 'transparent',
+        color: '#fff',
+        outline: 'none',
+        cursor: 'pointer',
+        fontSize: '1rem',
+    },
+    grid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 250px))', // Adjusted for more square cards
+        gap: '20px',
+    },
+    reviewCard: {
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between', // Ensures buttons are aligned to the bottom
+        backgroundColor: '#673ab7',
+        padding: '15px',
+        borderRadius: '10px',
+        boxShadow: '0px 4px 6px rgba(0,0,0,0.1)',
+        height: '100%', // Ensures cards are of equal height
+    },
+    reviewText: {
+        color: '#fff',
+        margin: '0px 0',
+    },
+    buttonContainer: {
+        display: 'flex',
+        justifyContent: 'space-between', // Spaces buttons evenly
+        marginTop: '4px',
+    },
+    button: {
+        padding: '10px 20px',
+        backgroundColor: '#007bff',
+        border: 'none',
+        borderRadius: '5px',
+        color: 'white',
+        cursor: 'pointer',
+    },
+    formInput: {
+        width: '100%',
+        padding: '8px',
+        margin: '5px 0',
+        borderRadius: '5px',
+        border: '1px solid #fff',
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        color: '#fff',
+    },
+    textArea: {
+        width: '100%',
+        height: '100px',
+        padding: '8px',
+        margin: '5px 0',
+        borderRadius: '5px',
+        border: '1px solid #fff',
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        color: '#fff',
+        resize: 'vertical',
+    },
+    formLabel: {
+        display: 'block',
+        margin: '10px 0 5px',
+        color: '#fff',
+    },
+};
 
 function UserReviewsPage() {
     const [reviews, setReviews] = useState([]);
@@ -10,7 +96,7 @@ function UserReviewsPage() {
 
     useEffect(() => {
         fetchReviews();
-    }, [selectedYear]); // Fetch reviews whenever selectedYear changes
+    }, [selectedYear]);
 
     const fetchReviews = async () => {
         const token = localStorage.getItem('token');
@@ -96,51 +182,45 @@ function UserReviewsPage() {
     };
 
     return (
-        <div>
-            <h2>My Reviews</h2>
-            <div>
-                <label>Filter by year: </label>
-                <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
+        <div style={styles.container}>
+            <h2 style={styles.heading}>My Reviews</h2>
+            <div style={styles.filterContainer}>
+                <label style={styles.formLabel}>Filter by year: </label>
+                <select style={styles.select} value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
                     <option value="All">All Years</option>
                     {years.map(year => (
                         <option key={year} value={year}>{year}</option>
                     ))}
                 </select>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px', marginTop: '20px' }}>
+            <div style={styles.grid}>
                 {reviews.filter(review => selectedYear === 'All' || new Date(review.albumDetails.release_date).getFullYear().toString() === selectedYear).map((review) => (
-                    <div key={review._id} style={{ border: '1px solid #ccc', padding: '20px', borderRadius: '5px' }}>
+                    <div key={review._id} style={styles.reviewCard}>
                         {editReviewId === review._id ? (
                             <form onSubmit={handleSaveClick}>
-                                <div>
-                                    <label>Rating: </label>
-                                    <input type="number" name="rating" value={editFormData.rating} onChange={handleEditFormChange} />
-                                </div>
-                                <div>
-                                    <label>Strength: </label>
-                                    <select name="strength" value={editFormData.strength} onChange={handleEditFormChange}>
-                                        <option value="light">Light</option>
-                                        <option value="mid">Mid</option>
-                                        <option value="strong">Strong</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label>Review Text: </label>
-                                    <textarea name="reviewText" value={editFormData.reviewText} onChange={handleEditFormChange} />
-                                </div>
-                                <button type="submit">Save</button>
-                                <button onClick={handleCancelClick}>Cancel</button>
+                                <label style={styles.formLabel}>Rating:</label>
+                                <input type="number" name="rating" value={editFormData.rating} onChange={handleEditFormChange} style={styles.formInput} />
+                                <label style={styles.formLabel}>Strength:</label>
+                                <select name="strength" value={editFormData.strength} onChange={handleEditFormChange} style={styles.select}>
+                                    <option value="light">Light</option>
+                                    <option value="mid">Mid</option>
+                                    <option value="strong">Strong</option>
+                                </select>
+                                <label style={styles.formLabel}>Review Text:</label>
+                                <textarea name="reviewText" value={editFormData.reviewText} onChange={handleEditFormChange} style={styles.textArea} />
+                                <button type="submit" style={styles.button}>Save</button>
+                                <button type="button" onClick={handleCancelClick} style={styles.button}>Cancel</button>
                             </form>
                         ) : (
                             <>
                                 {review.albumDetails.images[0] && (
-                                    <img src={review.albumDetails.images[0].url} alt="Album cover" style={{ width: '100px', height: '100px', marginBottom: '10px' }} />
+                                    <img src={review.albumDetails.images[0].url} alt="Album cover" style={{ width: '100%', borderRadius: '5px', marginBottom: '10px' }} />
                                 )}
-                                <h3>{review.albumDetails.name} by {review.albumDetails.artists.map(artist => artist.name).join(', ')}</h3>
-                                <p>Rating: {review.rating} ({review.strength})</p>
-                                <p>Review: {review.reviewText}</p>
-                                <button onClick={() => handleEditClick(review)}>Edit</button>
-                                <button onClick={() => handleDeleteClick(review._id)}>Delete</button>
+                                <h3 style={styles.reviewText}>{review.albumDetails.name} by {review.albumDetails.artists.map(artist => artist.name).join(', ')}</h3>
+                                <p style={styles.reviewText}>Rating: {review.rating} - {review.strength}</p>
+                                <p style={styles.reviewText}>{review.reviewText}</p>
+                                <button onClick={() => handleEditClick(review)} style={styles.button}>Edit</button>
+                                <button onClick={() => handleDeleteClick(review._id)} style={styles.button}>Delete</button>
                             </>
                         )}
                     </div>
