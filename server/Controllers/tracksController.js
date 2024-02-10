@@ -3,7 +3,6 @@ const axios = require('axios');
 const { getSpotifyAccessToken } = require('../spotifyAuth');
 const app = express();
 
-// Reusable function to make Spotify API requests
 async function fetchSpotifyData(endpoint, accessToken) {
   try {
     const response = await axios.get(endpoint, {
@@ -17,20 +16,18 @@ async function fetchSpotifyData(endpoint, accessToken) {
   }
 }
 
-// Route handler for searching tracks by name
+// Route handler for searching tracks by name with a limit of 5 tracks
 app.get('/search', async (req, res) => {
   try {
-    const searchQuery = req.query.query;
+    const searchQuery = encodeURIComponent(req.query.query);
     const accessToken = await getSpotifyAccessToken();
+    // Enforce a limit of 5 tracks to be fetched at a time
+    const limit = 5;
 
-    const spotifySearchUrl = `https://api.spotify.com/v1/search?q=${searchQuery}&type=track`;
-    const searchResponse = await axios.get(spotifySearchUrl, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    const spotifySearchUrl = `https://api.spotify.com/v1/search?q=${searchQuery}&type=track&limit=${limit}`;
+    const searchResponse = await fetchSpotifyData(spotifySearchUrl, accessToken);
 
-    const tracks = searchResponse.data.tracks.items;
+    const tracks = searchResponse.tracks.items;
 
     if (tracks.length === 0) {
       res.status(200).json({ message: 'No tracks found' });

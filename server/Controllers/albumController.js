@@ -1,4 +1,3 @@
-// Import necessary modules
 const express = require('express');
 const axios = require('axios');
 const { getSpotifyAccessToken } = require('../spotifyAuth');
@@ -17,30 +16,24 @@ async function fetchSpotifyData(endpoint, accessToken) {
   }
 }
 
-// Route handler for searching albums by name
+// Route handler for searching albums by name with a limit of 5 albums
 router.get('/search', async (req, res) => {
   try {
     const searchQuery = encodeURIComponent(req.query.query);
     const accessToken = await getSpotifyAccessToken();
+    // Enforce a limit of 5 albums to be fetched at a time
+    const limit = 5; // Limit the number of results to 5
 
-    // Spotify API endpoint URL for searching albums by name
-    const spotifySearchUrl = `https://api.spotify.com/v1/search?q=${searchQuery}&type=album`;
+    // Spotify API endpoint URL for searching albums by name with a limit
+    const spotifySearchUrl = `https://api.spotify.com/v1/search?q=${searchQuery}&type=album&limit=${limit}`;
 
-    const searchResponse = await axios.get(spotifySearchUrl, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    const searchResponse = await fetchSpotifyData(spotifySearchUrl, accessToken);
 
-    const albums = searchResponse.data.albums.items;
-
-    console.log('Search Query:', searchQuery);
-    console.log('Albums:', albums); // Debugging line
+    const albums = searchResponse.albums.items;
 
     if (albums.length === 0) {
       res.status(200).json({ message: 'No albums found' });
     } else {
-      // Map the albums to match the format of the /artists/search response
       const formattedAlbums = albums.map(album => ({
         id: album.id,
         name: album.name,
@@ -56,9 +49,6 @@ router.get('/search', async (req, res) => {
   }
 });
 
-  
-
-// Route handler for fetching album information by ID
 // Route handler for fetching album information by ID
 router.get('/:id', async (req, res) => {
   try {
@@ -67,14 +57,11 @@ router.get('/:id', async (req, res) => {
     const spotifyApiUrl = `https://api.spotify.com/v1/albums/${albumId}`;
     const albumData = await fetchSpotifyData(spotifyApiUrl, accessToken);
 
-  // Check if the album has artists associated with it
-if (albumData.artists && albumData.artists.length > 0) {
-  // Access the first artist's name 
-  albumData.artistName = albumData.artists[0].name;
-} else {
-  // If no artists are associated with the album, set a default value
-  albumData.artistName = 'Unknown Artist';
-}
+    if (albumData.artists && albumData.artists.length > 0) {
+      albumData.artistName = albumData.artists[0].name;
+    } else {
+      albumData.artistName = 'Unknown Artist';
+    }
 
     res.status(200).json(albumData);
   } catch (error) {
@@ -82,21 +69,18 @@ if (albumData.artists && albumData.artists.length > 0) {
     res.status(500).json({ error: 'Failed to fetch album data from Spotify' });
   }
 });
-// Route handler for fetching tracks of an album by ID
+
+// Route handler for fetching tracks of an album by ID, handling pagination if more than 5 tracks
 router.get('/:id/tracks', async (req, res) => {
   try {
     const albumId = req.params.id;
     const accessToken = await getSpotifyAccessToken();
-    const spotifyApiUrl = `https://api.spotify.com/v1/albums/${albumId}/tracks`;
-    const response = await axios.get(spotifyApiUrl, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    const limit = 20; // Limit the number of tracks fetched to 5
+    const spotifyApiUrl = `https://api.spotify.com/v1/albums/${albumId}/tracks?limit=${limit}`;
 
-    const tracksData = response.data.items;
+    const response = await fetchSpotifyData(spotifyApiUrl, accessToken);
 
-    res.status(200).json(tracksData);
+    res.status(200).json(response.items);
   } catch (error) {
     console.error('Error fetching album tracks from Spotify:', error);
     res.status(500).json({ error: 'Failed to fetch album tracks from Spotify' });

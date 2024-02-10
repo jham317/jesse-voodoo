@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BiShow, BiHide } from "react-icons/bi";
-import axios from 'axios'; //
+import axios from 'axios';
 
 const styles = {
   container: {
@@ -9,38 +9,68 @@ const styles = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    height: '60vh',
-    fontFamily: 'Poppins, sans-serif', // Use Poppins as the primary font
-
+    height: '100vh', // Full viewport height
+    background: 'linear-gradient(to bottom, #6a0dad, #9b59b6)', // Purple gradient background
+    fontFamily: 'Poppins, sans-serif',
   },
   form: {
-    width: '300px',
-    padding: '20px',
-    border: '1px solid #ccc',
-    borderRadius: '10px',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    backgroundColor: 'white',
-    fontFamily: 'Poppins, sans-serif', // Use Poppins as the primary font
-
+    width: '320px', // Adjusted width for a compact look
+    padding: '40px', // Increased padding for a rounded effect
+    marginBottom: '200px',
+    background: 'rgba(106, 13, 173, 0.2)', // Lighter, semi-transparent purple
+    borderRadius: '20px', // Smoothly rounded corners for the form
+    border: '1px solid white', // White border for contrast
+    display: 'flex',
+    flexDirection: 'column', // Stack form elements vertically
+    alignItems: 'center', // Center align form elements
+    justifyContent: 'center', // Center content vertically
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // Subtle shadow for depth
   },
   input: {
-    marginBottom: '10px',
-    padding: '8px',
-    width: '100%',
-    border: '1px solid #ccc',
-    borderRadius: '5px',
+    width: '90%', // Full width of the form container
+    padding: '12px', // Comfortable padding for typing
+    marginBottom: '15px', // Space between form elements
+    border: '1px solid #fff', // White border to stand out on the background
+    borderRadius: '5px', // Consistently rounded corners
+    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Slightly transparent background
+    color: '#fff', // White text for readability
+    fontSize: '16px', // Slightly larger font for ease of reading
+    outline: 'none', // Remove the default focus outline
   },
   button: {
-    padding: '10px',
-    width: '100%',
-    backgroundColor: '#007BFF',
-    color: 'white',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    fontFamily: 'Poppins, sans-serif', // Use Poppins as the primary font
-
+    padding: '10px 20px', // Adequate padding for clickability
+    width: 'auto', // Auto width based on content
+    backgroundColor: 'var(--prince-yellow)', // Vibrant prince yellow for the button
+    color: 'white', // White text for contrast
+    border: 'none', // No border for a clean look
+    borderRadius: '5px', // Rounded corners for the button
+    cursor: 'pointer', // Pointer cursor on hover
+    fontSize: '18px', // Bold font size for visibility
+    fontWeight: 'bold', // Bold font weight for emphasis
+    marginTop: '20px', // Margin top for spacing from the inputs
   },
+  link: {
+    marginTop: '20px', // Space above the sign-up link
+    color: 'var(--prince-yellow)', // Consistent prince yellow for clickable links
+    textDecoration: 'none', // No underline for a clean look
+    fontSize: '16px', // Comfortable reading size
+    fontWeight: 'bold', // Bold for emphasis
+  },
+  title: {
+    fontSize: '24px', // Large, readable title size
+    color: '#FFF', // White for high contrast
+    fontWeight: 'bold', // Bold for prominence
+    marginBottom: '30px', // Space below the title for separation
+  },
+  icon: {
+    marginBottom: '100px',
+      position: 'absolute', // Position icons inside the input fields
+    right: '10px', // Align to the right
+    top: '50%', // Center vertically
+    transform: 'translateY(-50%)', // Perfect vertical centering
+    color: '#FFF', // White to match the input text color
+    cursor: 'pointer', // Pointer to indicate clickable
+  }
 };
 
 const Login = () => {
@@ -82,7 +112,7 @@ const Login = () => {
 
   return (
     <div style={styles.container}>
-      <form style={styles.form} onSubmit={handleLogin}>
+    <form style={styles.form} onSubmit={handleLogin}>
         <h2>Login</h2>
         <div>
           <input
@@ -120,10 +150,11 @@ const Login = () => {
         <button style={styles.button} type="submit" disabled={loading}>
           {loading ? 'Logging in...' : 'Login'}
         </button>
-      </form>
-      <p>
-        Don't have an account? <Link to="/signup">Sign Up</Link>
+        <p>
+        Don't have an account? <Link to="/signup" style={styles.link}>Sign Up</Link>
       </p>
+      </form>
+      
     </div>
   );
 };

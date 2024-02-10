@@ -53,12 +53,18 @@ const styles = {
         marginTop: '4px',
     },
     button: {
-        padding: '10px 20px',
-        backgroundColor: '#007bff',
+        padding: '8px 16px',
+        backgroundColor: 'var(--prince-yellow)', // Define this variable in your CSS or directly use the hex color
         border: 'none',
-        borderRadius: '5px',
-        color: 'white',
+        borderRadius: '20px', // More rounded corners
+        color: '#673ab7', // Text color for better contrast with the yellow background
         cursor: 'pointer',
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+        fontSize: '0.8rem',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.2)', // Subtle shadow for depth
+        transition: 'background-color 0.3s ease', // Smooth transition on hover
+        margin: '5px', // Add some spacing around buttons
     },
     formInput: {
         width: '100%',

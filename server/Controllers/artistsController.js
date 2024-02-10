@@ -3,7 +3,6 @@ const axios = require('axios');
 const { getSpotifyAccessToken } = require('../spotifyAuth');
 const app = express();
 
-// Reusable function to make Spotify API requests
 async function fetchSpotifyData(endpoint, accessToken) {
   try {
     const response = await axios.get(endpoint, {
@@ -17,28 +16,26 @@ async function fetchSpotifyData(endpoint, accessToken) {
   }
 }
 
-// Route handler for searching artists by name
+// Route handler for searching artists by name with a limit of 5 artists
 app.get('/search', async (req, res) => {
   try {
-    const searchQuery = req.query.query;
-    console.log('Search query:', searchQuery); 
+    const searchQuery = encodeURIComponent(req.query.query);
+    console.log('Search query:', searchQuery);
     const accessToken = await getSpotifyAccessToken();
+    // Enforce a limit of 5 artists to be fetched at a time
+    const limit = 5;
 
-    const spotifySearchUrl = `https://api.spotify.com/v1/search?q=${searchQuery}&type=artist`;
-    const searchResponse = await axios.get(spotifySearchUrl, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    const spotifySearchUrl = `https://api.spotify.com/v1/search?q=${searchQuery}&type=artist&limit=${limit}`;
+    const searchResponse = await fetchSpotifyData(spotifySearchUrl, accessToken);
 
-    const artistResults = searchResponse.data.artists.items;
+    const artistResults = searchResponse.artists.items;
 
     if (artistResults.length === 0) {
       res.status(200).json({ message: 'No artists found' });
     } else {
       res.status(200).json(artistResults);
     }
-    } catch (error) {
+  } catch (error) {
     console.error('Error searching for artists:', error);
     res.status(500).json({ error: 'Failed to search for artists' });
   }
@@ -59,12 +56,15 @@ app.get('/:id', async (req, res) => {
   }
 });
 
-// Route handler for fetching artist's albums by ID
+// Route handler for fetching an artist's albums by ID with a limit of 5 albums
 app.get('/:id/albums', async (req, res) => {
   try {
     const artistId = req.params.id;
     const accessToken = await getSpotifyAccessToken();
-    const spotifyApiUrl = `https://api.spotify.com/v1/artists/${artistId}/albums`;
+    // Enforce a limit of 5 albums to be fetched at a time
+    const limit = 5;
+    const spotifyApiUrl = `https://api.spotify.com/v1/artists/${artistId}/albums?limit=${limit}`;
+
     const artistAlbumsData = await fetchSpotifyData(spotifyApiUrl, accessToken);
 
     res.status(200).json(artistAlbumsData);
@@ -73,7 +73,5 @@ app.get('/:id/albums', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch artist albums from Spotify' });
   }
 });
-
-
 
 module.exports = app;

@@ -1,17 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-
-
+import { debounce } from 'lodash';
 
 function HomePage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('artist');
   const [suggestions, setSuggestions] = useState([]);
-  
+  // Declare cache outside of the useEffect to persist its state across renders
+  const cache = {};
 
   useEffect(() => {
-    if (searchTerm) {
+    // Debounce the fetchData function
+    const debouncedFetchData = debounce(async () => {
+      if (!searchTerm) {
+        setSuggestions([]);
+        return;
+      }
+
+      // Use cache key based on searchTerm and selectedCategory
+      const cacheKey = `${searchTerm}-${selectedCategory}`;
+      if (cache[cacheKey]) {
+        setSuggestions(cache[cacheKey]);
+        return;
+      }
+
       let apiUrl;
       switch (selectedCategory) {
         case 'artist':
@@ -25,57 +38,30 @@ function HomePage() {
           break;
         default:
           apiUrl = '';
-      };
-      
+      }
 
-      axios
-        .get(apiUrl)
-        .then(async (response) => {
-          if (Array.isArray(response.data)) {
-            const albumIds = response.data
-              .filter((result) => result.type === 'album')
-              .map((result) => result.id);
+      try {
+        const response = await axios.get(apiUrl);
+        // Check if the response data is an array and slice it to limit to 5 results
+        const limitedResults = Array.isArray(response.data) ? response.data.slice(0, 5) : [];
+        setSuggestions(limitedResults);
+        // Update the cache with new data
+        cache[cacheKey] = limitedResults;
+      } catch (error) {
+        console.error('Error fetching suggestions:', error);
+        setSuggestions([]);
+      }
+    }, 500);
 
-            // Fetch album information for all album search results
-            const albumInfoPromises = albumIds.map(fetchAlbumInfo);
+    debouncedFetchData();
 
-            // Wait for all album info requests to complete
-            const albumInfos = await Promise.all(albumInfoPromises);
+    // Cleanup function to cancel the debounced call if component unmounts
+    return () => {
+      debouncedFetchData.cancel();
+    };
+  }, [searchTerm, selectedCategory]); // Dependencies are correctly listed
 
-            // Create a map of album IDs to artist names
-            const albumIdToArtistName = {};
-            albumInfos.forEach((albumInfo, index) => {
-              if (albumInfo) {
-                albumIdToArtistName[albumIds[index]] = albumInfo.artistName || 'Unknown Artist';
-              }
-            });
-
-            // Format suggestions and add artist names for albums
-            const formattedSuggestions = response.data.map((result) => {
-              if (result.type === 'album') {
-                return {
-                  ...result,
-                  artistName: albumIdToArtistName[result.id],
-                };
-              }
-              return result;
-            });
-
-            setSuggestions(formattedSuggestions.slice(0, 5));
-          } else {
-            setSuggestions([]);
-          }
-        })
-        .catch((error) => {
-          console.error('Error fetching suggestions:', error);
-          setSuggestions([]);
-        });
-    } else {
-      setSuggestions([]);
-    }
-  }, [searchTerm, selectedCategory]);
-
-  // Function to fetch album information by ID
+  // Function to fetch album information by ID (kept for future use)
   async function fetchAlbumInfo(albumId) {
     try {
       const response = await axios.get(`/albums/${albumId}`);

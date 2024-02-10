@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const Header = () => {
   return (
-    <Link to="/" style={{ textDecoration: 'none', color: 'var(--prince-yellow)' }}>
+    <Link to="/home" style={{ textDecoration: 'none', color: 'var(--prince-yellow)' }}>
       <h1 style={{ fontFamily: 'Sniglet, cursive', textAlign: 'center', fontSize: '7rem' }}>
         Voodoo
       </h1>
