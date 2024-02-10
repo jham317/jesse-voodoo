@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+
 const styles = {
     container: {
         padding: '20px',
@@ -12,11 +13,15 @@ const styles = {
         textAlign: 'center',
         fontSize: '2rem',
         color: '#fff',
+        marginBottom: '20px', // Adjusted margin
     },
     filterContainer: {
         display: 'flex',
         justifyContent: 'center',
         margin: '20px 0',
+        marginBottom: '20px', // Adjusted margin
+        alignItems: 'center',
+        paddingLeft: '10px', // Added left padding
     },
     select: {
         padding: '10px 20px',
@@ -27,21 +32,25 @@ const styles = {
         outline: 'none',
         cursor: 'pointer',
         fontSize: '1rem',
+        marginRight: '10px',
     },
     grid: {
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 250px))', // Adjusted for more square cards
+        gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
         gap: '20px',
     },
     reviewCard: {
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between', // Ensures buttons are aligned to the bottom
         backgroundColor: '#673ab7',
         padding: '15px',
         borderRadius: '10px',
         boxShadow: '0px 4px 6px rgba(0,0,0,0.1)',
-        height: '100%', // Ensures cards are of equal height
+        marginBottom: '10px',
+    },
+    reviewTextContainer: {
+        flex: '1',
+        overflow: 'hidden',
     },
     reviewText: {
         color: '#fff',
@@ -49,22 +58,22 @@ const styles = {
     },
     buttonContainer: {
         display: 'flex',
-        justifyContent: 'space-between', // Spaces buttons evenly
+        justifyContent: 'space-between',
         marginTop: '4px',
     },
     button: {
         padding: '8px 16px',
-        backgroundColor: 'var(--prince-yellow)', // Define this variable in your CSS or directly use the hex color
+        backgroundColor: 'var(--prince-yellow)',
         border: 'none',
-        borderRadius: '20px', // More rounded corners
-        color: '#673ab7', // Text color for better contrast with the yellow background
+        borderRadius: '20px',
+        color: '#673ab7',
         cursor: 'pointer',
         fontWeight: 'bold',
         textTransform: 'uppercase',
         fontSize: '0.8rem',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.2)', // Subtle shadow for depth
-        transition: 'background-color 0.3s ease', // Smooth transition on hover
-        margin: '5px', // Add some spacing around buttons
+        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+        transition: 'background-color 0.3s ease',
+        margin: '5px',
     },
     formInput: {
         width: '100%',
@@ -93,16 +102,14 @@ const styles = {
     },
 };
 
+
 function UserReviewsPage() {
     const [reviews, setReviews] = useState([]);
     const [editReviewId, setEditReviewId] = useState(null);
     const [editFormData, setEditFormData] = useState({ rating: '', reviewText: '', strength: 'mid' });
     const [selectedYear, setSelectedYear] = useState('All');
     const [years, setYears] = useState([]);
-
-    useEffect(() => {
-        fetchReviews();
-    }, [selectedYear]);
+    const [sortBy, setSortBy] = useState('rating'); // Added sortBy state
 
     const fetchReviews = async () => {
         const token = localStorage.getItem('token');
@@ -115,7 +122,6 @@ function UserReviewsPage() {
             const response = await axios.get('http://localhost:4000/user/reviews', {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            // Include fetching album details from your Spotify route here
             const reviewsWithDetails = await Promise.all(response.data.map(async (review) => {
                 const albumDetailsResponse = await axios.get(`http://localhost:4000/albums/${review.albumId}`, {
                     headers: { Authorization: `Bearer ${token}` },
@@ -126,18 +132,42 @@ function UserReviewsPage() {
                 };
             }));
 
-            setReviews(reviewsWithDetails.sort((a, b) => {
-                const strengthOrder = { light: 1, mid: 2, strong: 3 };
-                if (b.rating - a.rating !== 0) return b.rating - a.rating;
-                return strengthOrder[b.strength] - strengthOrder[a.strength];
-            }));
+            // Sort reviews
+            const sortedReviews = reviewsWithDetails.sort((a, b) => {
+                if (sortBy === 'rating') {
+                    // Assign weights to strength levels
+                    const weight = { light: 0, mid: 1, strong: 2 };
+                    const rankA = a.rating * 10 + weight[a.strength];
+                    const rankB = b.rating * 10 + weight[b.strength];
+                    return rankB - rankA;
+                } else if (sortBy === 'date') {
+                    return new Date(b.createdAt) - new Date(a.createdAt);
+                }
+                return 0;
+            });
 
-            // Extract and set years from reviews
+            // Set reviews with adjusted rankings
+            setReviews(sortedReviews);
+
+            // Reset rankings for the selected year
+            const filteredReviews = sortedReviews.filter(review => selectedYear === 'All' || new Date(review.albumDetails.release_date).getFullYear().toString() === selectedYear);
+            const resetRankedReviews = filteredReviews.map((review, index) => ({ ...review, rank: index + 1 }));
+            setReviews(resetRankedReviews);
+
+            // Extract years for filter options
             const extractedYears = reviewsWithDetails.map(review => new Date(review.albumDetails.release_date).getFullYear());
             setYears([...new Set(extractedYears)].sort((a, b) => b - a));
         } catch (error) {
             console.error("Failed to fetch reviews:", error);
         }
+    };
+
+    useEffect(() => {
+        fetchReviews();
+    }, [selectedYear, sortBy]);
+
+    const handleSortChange = (event) => {
+        setSortBy(event.target.value);
     };
 
     const handleEditFormChange = (event) => {
@@ -165,12 +195,13 @@ function UserReviewsPage() {
             await axios.put(`http://localhost:4000/reviews/${editReviewId}`, editFormData, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            fetchReviews();
-            setEditReviewId(null);
+            fetchReviews(); // This line fetches the updated reviews
+            setEditReviewId(null); // Reset editReviewId after saving
         } catch (error) {
             console.error('Error updating review:', error);
         }
     };
+
 
     const handleDeleteClick = async (reviewId) => {
         const confirmDelete = window.confirm("Are you sure you want to delete this review?");
@@ -187,6 +218,25 @@ function UserReviewsPage() {
         }
     };
 
+    const handleSeeMoreClick = (reviewId) => {
+        const updatedReviews = reviews.map(review => {
+            if (review._id === reviewId) {
+                return { ...review, showMore: true };
+            }
+            return review;
+        });
+        setReviews(updatedReviews);
+    };
+
+    const handleSeeLessClick = (reviewId) => {
+        const updatedReviews = reviews.map(review => {
+            if (review._id === reviewId) {
+                return { ...review, showMore: false };
+            }
+            return review;
+        });
+        setReviews(updatedReviews);
+    };
     return (
         <div style={styles.container}>
             <h2 style={styles.heading}>My Reviews</h2>
@@ -199,36 +249,67 @@ function UserReviewsPage() {
                     ))}
                 </select>
             </div>
+    
+            <div style={styles.filterContainer}>
+                <label style={styles.formLabel}>Sort by: </label>
+                <select style={styles.select} value={sortBy} onChange={handleSortChange}>
+                    <option value="rating">Highest Rating</option>
+                    <option value="date">Date Reviewed</option>
+                </select>
+            </div>
+    
             <div style={styles.grid}>
-                {reviews.filter(review => selectedYear === 'All' || new Date(review.albumDetails.release_date).getFullYear().toString() === selectedYear).map((review) => (
+                {reviews.map((review) => (
                     <div key={review._id} style={styles.reviewCard}>
-                        {editReviewId === review._id ? (
-                            <form onSubmit={handleSaveClick}>
-                                <label style={styles.formLabel}>Rating:</label>
-                                <input type="number" name="rating" value={editFormData.rating} onChange={handleEditFormChange} style={styles.formInput} />
-                                <label style={styles.formLabel}>Strength:</label>
-                                <select name="strength" value={editFormData.strength} onChange={handleEditFormChange} style={styles.select}>
-                                    <option value="light">Light</option>
-                                    <option value="mid">Mid</option>
-                                    <option value="strong">Strong</option>
-                                </select>
-                                <label style={styles.formLabel}>Review Text:</label>
-                                <textarea name="reviewText" value={editFormData.reviewText} onChange={handleEditFormChange} style={styles.textArea} />
-                                <button type="submit" style={styles.button}>Save</button>
-                                <button type="button" onClick={handleCancelClick} style={styles.button}>Cancel</button>
-                            </form>
-                        ) : (
-                            <>
-                                {review.albumDetails.images[0] && (
-                                    <img src={review.albumDetails.images[0].url} alt="Album cover" style={{ width: '100%', borderRadius: '5px', marginBottom: '10px' }} />
+                        <span style={styles.rank}>Rank: {review.rank}</span>
+                        <div style={styles.reviewTextContainer}>
+                            {review.albumDetails.images[0] && (
+                                <img src={review.albumDetails.images[0].url} alt="Album cover" style={{ width: '100%', borderRadius: '5px', marginBottom: '10px' }} />
+                            )}
+                            <h3 style={styles.reviewText}>{review.albumDetails.name} by {review.albumDetails.artists.map(artist => artist.name).join(', ')}</h3>
+                            <p style={styles.reviewText}>Rating: {review.rating} - {review.strength}</p>
+                            <p style={styles.reviewText}>
+                                {review.showMore ? review.reviewText : `${review.reviewText.substring(0, 100)}`}
+                                {review.reviewText.length > 100 && (
+                                    <button onClick={() => review.showMore ? handleSeeLessClick(review._id) : handleSeeMoreClick(review._id)} style={styles.button}>
+                                        {review.showMore ? 'See Less' : 'See More'}
+                                    </button>
                                 )}
-                                <h3 style={styles.reviewText}>{review.albumDetails.name} by {review.albumDetails.artists.map(artist => artist.name).join(', ')}</h3>
-                                <p style={styles.reviewText}>Rating: {review.rating} - {review.strength}</p>
-                                <p style={styles.reviewText}>{review.reviewText}</p>
-                                <button onClick={() => handleEditClick(review)} style={styles.button}>Edit</button>
-                                <button onClick={() => handleDeleteClick(review._id)} style={styles.button}>Delete</button>
-                            </>
-                        )}
+                            </p>
+                            {editReviewId === review._id && (
+                                <form onSubmit={handleSaveClick}>
+                                    <input
+                                        type="text"
+                                        name="rating"
+                                        value={editFormData.rating}
+                                        onChange={handleEditFormChange}
+                                        style={styles.formInput}
+                                    />
+                                    <textarea
+                                        name="reviewText"
+                                        value={editFormData.reviewText}
+                                        onChange={handleEditFormChange}
+                                        style={styles.textArea}
+                                    />
+                                    <select
+                                        name="strength"
+                                        value={editFormData.strength}
+                                        onChange={handleEditFormChange}
+                                        style={styles.formInput}
+                                    >
+                                        <option value="light">Light</option>
+                                        <option value="mid">Mid</option>
+                                        <option value="strong">Strong</option>
+                                    </select>
+                                    <button type="submit">Save</button>
+                                    <button type="button" onClick={handleCancelClick}>Cancel</button>
+                                </form>
+                            )}
+                        </div>
+                        <div style={styles.buttonContainer}>
+                            <button onClick={() => handleEditClick(review)} style={styles.button}>Edit</button>
+                            <button onClick={() => handleDeleteClick(review._id)} style={styles.button}>Delete</button>
+                        </div>
                     </div>
                 ))}
             </div>

@@ -36,6 +36,7 @@ function AlbumsPage() {
   const [tracklist, setTracklist] = useState([]);
   const [artistId, setArtistId] = useState('');
   const [userId, setUserId] = useState(null); // Initialize userId state
+  const [userReview, setUserReview] = useState(null); // Initialize userReview state
 
   useEffect(() => {
     // Fetch album details by albumId
@@ -73,6 +74,38 @@ function AlbumsPage() {
         setTracklist([]);
       });
 
+    // Fetch user reviews with album details
+    const fetchReviews = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error("User not logged in");
+        return;
+      }
+
+      try {
+        const response = await axios.get('http://localhost:4000/user/reviews', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const reviewsWithDetails = await Promise.all(response.data.map(async (review) => {
+          const albumDetailsResponse = await axios.get(`http://localhost:4000/albums/${review.albumId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          return {
+            ...review,
+            albumDetails: albumDetailsResponse.data,
+          };
+        }));
+        // Find the user's review for the current album
+        const userReviewForAlbum = reviewsWithDetails.find(review => review.albumId === albumId);
+        setUserReview(userReviewForAlbum);
+      } catch (error) {
+        console.error('Error fetching user reviews:', error);
+        setUserReview(null);
+      }
+    };
+
+    fetchReviews();
+
     // Simulate user authentication and set the userId state
     // Replace this with your actual authentication logic
     // In this example, we are assuming that user data is available in the window object
@@ -101,6 +134,20 @@ function AlbumsPage() {
           </li>
         ))}
       </ul>
+
+      <div style={styles.ratingContainer}>
+        <h2>User Review</h2>
+        {userReview ? (
+          <>
+            <p>User Rating: {userReview.rating}</p>
+            <p>User Review: {userReview.reviewText}</p>
+            <p>Strength: {userReview.strength}</p>
+          </>
+        ) : (
+          <p>No review found.</p>
+        )}
+      </div>
+
       <div style={styles.ratingContainer}>
         <h2>Rate this Album</h2>
         {/* Pass the albumId and userId to the RatingForm component */}

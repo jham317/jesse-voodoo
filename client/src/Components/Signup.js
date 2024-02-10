@@ -125,10 +125,11 @@ const Signup = () => {
         <button style={styles.button} type="submit">
           Sign Up
         </button>
-      </form>
-      <p>
+        <p>
         Already have an account? <Link to="/login" style={styles.link}>Log In</Link>
       </p>
+      </form>
+  
     </div>
   );
 };

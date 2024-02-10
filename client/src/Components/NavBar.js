@@ -8,12 +8,12 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '1rem',
-    background: 'var(--prince-purple)', // Background color for the navigation bar
+    background: 'var(--prince-purple)',
     color: 'white',
-    position: 'fixed', // Fix the navigation bar at the top
-    top: 0, // Position it at the top of the viewport
-    width: '100%', // Make it full width
-    borderRadius: '0 0 20px 20px', // Rounded bottom corners
+    position: 'fixed',
+    top: 0,
+    width: '100%',
+    borderRadius: '0 0 20px 20px',
   },
 
   link: {
@@ -24,17 +24,17 @@ const styles = {
     borderRadius: '10px',
     display: 'flex',
     alignItems: 'center',
-    marginRight: '10px', // Add some space between the icons if needed
-    fontSize: '1.5rem', // Adjust based on your design
+    marginRight: '10px',
+    fontSize: '1.5rem',
   },
 
   loginButtonContainer: {
-    marginRight: 'auto', // Move the login button to the right
+    marginRight: 'auto',
   },
   loginButton: {
     textDecoration: 'none',
     backgroundColor: 'var(--prince-purple)',
-    fontFamily: 'Sniglet, cursive', // Use custom font
+    fontFamily: 'Sniglet, cursive',
     color: 'white',
     padding: '1rem 2rem',
     borderRadius: '20px',
@@ -52,10 +52,10 @@ const NavBar = () => {
           Login
         </Link>
       </div>
-      {/* User Reviews Page Link */}
       <Link to="/user/reviews" style={styles.link}>
         <FaStar /> Reviews
       </Link>
+     
     </div>
   );
 };
