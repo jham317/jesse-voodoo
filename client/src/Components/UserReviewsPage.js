@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const styles = {
     container: {
@@ -43,7 +44,7 @@ const styles = {
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: '#673ab7',
-        padding: '15px',
+        padding: '10px', // Reduce padding to make the container smaller vertically
         borderRadius: '10px',
         boxShadow: '0px 4px 6px rgba(0,0,0,0.1)',
         marginBottom: '10px',
@@ -51,18 +52,21 @@ const styles = {
     reviewTextContainer: {
         flex: '1',
         overflow: 'hidden',
+        paddingBottom: '10px', // Adjusted padding
     },
     reviewText: {
         color: '#fff',
         margin: '0px 0',
+        marginBottom: '10px',
     },
     buttonContainer: {
         display: 'flex',
         justifyContent: 'space-between',
-        marginTop: '4px',
+        marginTop: 'auto', // Push the button container to the bottom
+        paddingTop: '5px', // Adjusted padding
     },
     button: {
-        padding: '8px 16px',
+        padding: '8px 12px',
         backgroundColor: 'var(--prince-yellow)',
         border: 'none',
         borderRadius: '20px',
@@ -75,33 +79,7 @@ const styles = {
         transition: 'background-color 0.3s ease',
         margin: '5px',
     },
-    formInput: {
-        width: '100%',
-        padding: '8px',
-        margin: '5px 0',
-        borderRadius: '5px',
-        border: '1px solid #fff',
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        color: '#fff',
-    },
-    textArea: {
-        width: '100%',
-        height: '100px',
-        padding: '8px',
-        margin: '5px 0',
-        borderRadius: '5px',
-        border: '1px solid #fff',
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        color: '#fff',
-        resize: 'vertical',
-    },
-    formLabel: {
-        display: 'block',
-        margin: '10px 0 5px',
-        color: '#fff',
-    },
 };
-
 
 function UserReviewsPage() {
     const [reviews, setReviews] = useState([]);
@@ -110,6 +88,23 @@ function UserReviewsPage() {
     const [selectedYear, setSelectedYear] = useState('All');
     const [years, setYears] = useState([]);
     const [sortBy, setSortBy] = useState('rating'); // Added sortBy state
+    const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track authentication status
+    const navigate = useNavigate(); // Get the navigate function
+    
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          navigate('/login'); // Redirect to login page if token is not present
+        } else {
+          setIsLoggedIn(true); // Set isLoggedIn to true if token exists
+        }
+      }, [navigate]); // Include navigate in the dependency array to prevent useEffect from running indefinitely
+    
+      useEffect(() => {
+        const token = localStorage.getItem('token');
+        setIsLoggedIn(!!token); // Set isLoggedIn to true if token exists, false otherwise
+      }, []); // Empty dependency array ensures this effect only runs once on component mount
+    
 
     const fetchReviews = async () => {
         const token = localStorage.getItem('token');
@@ -239,6 +234,13 @@ function UserReviewsPage() {
     };
     return (
         <div style={styles.container}>
+          {/* Render login button if not logged in */}
+          {!isLoggedIn && (
+            <button onClick={() => navigate('/login')} style={styles.button}>
+              Login
+            </button>
+          )}
+    
             <h2 style={styles.heading}>My Reviews</h2>
             <div style={styles.filterContainer}>
                 <label style={styles.formLabel}>Filter by year: </label>
@@ -266,6 +268,8 @@ function UserReviewsPage() {
                             {review.albumDetails.images[0] && (
                                 <img src={review.albumDetails.images[0].url} alt="Album cover" style={{ width: '100%', borderRadius: '5px', marginBottom: '10px' }} />
                             )}
+                                                        <p style={styles.reviewText}>Date Reviewed: {new Date(review.createdAt).toLocaleDateString()}</p>
+
                             <h3 style={styles.reviewText}>{review.albumDetails.name} by {review.albumDetails.artists.map(artist => artist.name).join(', ')}</h3>
                             <p style={styles.reviewText}>Rating: {review.rating} - {review.strength}</p>
                             <p style={styles.reviewText}>
@@ -273,6 +277,7 @@ function UserReviewsPage() {
                                 {review.reviewText.length > 100 && (
                                     <button onClick={() => review.showMore ? handleSeeLessClick(review._id) : handleSeeMoreClick(review._id)} style={styles.button}>
                                         {review.showMore ? 'See Less' : 'See More'}
+                                        
                                     </button>
                                 )}
                             </p>

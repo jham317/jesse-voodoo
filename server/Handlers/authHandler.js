@@ -26,11 +26,13 @@ exports.loginUser = async (req, res) => {
     const db = await connectToDatabase();
     const usersCollection = db.collection('users');
     const { username, password } = req.body;
+    console.log('Username:', username); 
     
     try {
         const user = await usersCollection.findOne({ username });
         if (user && await bcrypt.compare(password, user.password)) {
             const token = jwt.sign({ userId: user._id.toString() }, process.env.JWT_SECRET, { expiresIn: '1h' });
+            console.log('Generated token:', token); // Log the generated token
             res.status(200).json({ token });
         } else {
             res.status(401).send('Username or password is incorrect');
@@ -39,3 +41,5 @@ exports.loginUser = async (req, res) => {
         res.status(500).send('Server error: ' + error.message);
     }
 };
+
+

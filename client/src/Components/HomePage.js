@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'; // Import Navigate
 import { debounce } from 'lodash';
+import NavBar from './NavBar';
+
 
 function HomePage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('artist');
   const [suggestions, setSuggestions] = useState([]);
+
   // Declare cache outside of the useEffect to persist its state across renders
   const cache = {};
+  
 
   useEffect(() => {
     // Debounce the fetchData function
@@ -75,6 +79,10 @@ function HomePage() {
 
   return (
     <div style={styles.container}>
+      {/* Navbar */}
+      <NavBar />
+      {/* Render Logout button if logged in, otherwise render Login button */}
+    
       <h1 style={styles.heading}>Search for Music</h1>
       <div style={styles.searchContainer}>
         <select

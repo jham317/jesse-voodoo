@@ -31,6 +31,7 @@ app.post('/login', loginUser);
 // Ensure these routes are added within the async function where you set up your server after connecting to the database
 app.post('/reviews', authenticateToken, postReview);
 app.get('/user/reviews', authenticateToken, fetchUserReviews);
+
 app.put('/reviews/:id', authenticateToken, updateReview); // Make sure updateReview is defined and exported
 app.delete('/reviews/:id', authenticateToken, deleteReview); // Make sure deleteReview is defined and exported
 

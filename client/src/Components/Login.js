@@ -74,46 +74,47 @@ const styles = {
 };
 
 const Login = () => {
+  // Define state variables
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Function to handle login submission
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Using axios for consistency with the RatingForm example
+      // Send login request to the server
       const response = await axios.post('/login', {
         username,
         password,
       });
 
+      // Check if login was successful
       if (response.status === 200) {
-        // Store the token in localStorage or sessionStorage
+        // Store the token in localStorage
         localStorage.setItem('token', response.data.token);
-
-        // Authentication successful, redirect to the main content or user profile
+        // Redirect the user to the home page
         navigate('/home');
-      } else {
-        // Handle failed login attempt
-        console.log('Authentication failed. Invalid username or password.');
       }
     } catch (error) {
-      // Handle any errors
-      console.error('An error occurred:', error);
-      alert('Login failed: ' + (error.response?.data || 'Please try again later.'));
+      // Handle login error
+      setError(error.response?.data || 'An error occurred. Please try again.');
     } finally {
+      // Reset loading state
       setLoading(false);
     }
   };
 
   return (
     <div style={styles.container}>
-    <form style={styles.form} onSubmit={handleLogin}>
+      <form style={styles.form} onSubmit={handleLogin}>
         <h2>Login</h2>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
         <div>
           <input
             style={styles.input}
@@ -151,10 +152,9 @@ const Login = () => {
           {loading ? 'Logging in...' : 'Login'}
         </button>
         <p>
-        Don't have an account? <Link to="/signup" style={styles.link}>Sign Up</Link>
-      </p>
+          Don't have an account? <Link to="/signup" style={styles.link}>Sign Up</Link>
+        </p>
       </form>
-      
     </div>
   );
 };

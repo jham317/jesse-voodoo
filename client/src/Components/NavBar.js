@@ -1,61 +1,64 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { FaStar } from "react-icons/fa";
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom'; // Import Link
 
 const styles = {
   container: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '1rem',
-    background: 'var(--prince-purple)',
-    color: 'white',
     position: 'fixed',
     top: 0,
     width: '100%',
+    background: 'var(--prince-purple)',
+    color: 'white',
     borderRadius: '0 0 20px 20px',
+    padding: '1rem',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-
   link: {
     textDecoration: 'none',
     color: 'white',
     fontFamily: 'Sniglet, cursive',
-    padding: '0.5rem 2rem',
-    borderRadius: '10px',
+    padding: '0.5rem 1rem',
     display: 'flex',
     alignItems: 'center',
-    marginRight: '10px',
+    marginRight: '1rem',
     fontSize: '1.5rem',
   },
-
-  loginButtonContainer: {
-    marginRight: 'auto',
-  },
-  loginButton: {
-    textDecoration: 'none',
-    backgroundColor: 'var(--prince-purple)',
+  username: {
     fontFamily: 'Sniglet, cursive',
-    color: 'white',
-    padding: '1rem 2rem',
-    borderRadius: '20px',
-    fontSize: '1.8rem',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s ease',
+    fontSize: '1.5rem',
+    marginRight: '10px',
   },
 };
 
 const NavBar = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState('');
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsLoggedIn(true);
+      const storedUsername = localStorage.getItem('username');
+      setUsername(storedUsername);
+    }
+  }, []);
+
   return (
     <div style={styles.container}>
-      <div style={styles.loginButtonContainer}>
-        <Link to="/login" style={styles.loginButton} className="login-button">
-          Login
+      <div>
+        <Link to="/user/reviews" style={styles.link}>
+          Reviews
         </Link>
       </div>
-      <Link to="/user/reviews" style={styles.link}>
-        <FaStar /> Reviews
-      </Link>
-     
+      <div>
+        {isLoggedIn && <div style={styles.username}>{username}</div>}
+        {!isLoggedIn && (
+          <div style={styles.loginButton}>
+            <Link to="/login">Login</Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
