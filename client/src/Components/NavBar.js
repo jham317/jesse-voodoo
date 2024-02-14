@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom'; // Import Link
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from './AuthContext'; // Adjust this import path to where your AuthContext is located
 
 const styles = {
   container: {
@@ -35,35 +36,26 @@ const styles = {
 };
 
 const NavBar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState('');
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      setIsLoggedIn(true);
-      const storedUsername = localStorage.getItem('username');
-      setUsername(storedUsername);
-    }
-  }, []);
+  const { currentUser } = useAuth(); // Use the authentication context
 
   return (
     <div style={styles.container}>
       <div style={styles.linkContainer}>
-        {isLoggedIn && (
+        {currentUser && (
           <>
             <Link to="/user/reviews" style={styles.link}>
               Reviews
             </Link>
-            <Link to="/liked-songs" style={styles.link}>Liked Songs</Link> {/* Add this line */}
+            <Link to="/liked-songs" style={styles.link}>Liked Songs</Link>
           </>
         )}
       </div>
       <div>
-        {isLoggedIn && <div style={styles.username}>{username}</div>}
-        {!isLoggedIn && (
-          <div style={styles.loginButton}>
-            <Link to="/login">Login</Link>
+        {currentUser ? (
+          <div style={styles.username}>{currentUser.username}</div> // Display username from currentUser
+        ) : (
+          <div>
+            <Link to="/login" style={styles.link}>Login</Link>
           </div>
         )}
       </div>

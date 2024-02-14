@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BiShow, BiHide } from "react-icons/bi";
 import axios from 'axios';
+import { useAuth } from './AuthContext'; // Make sure this path is correct
 
 const styles = {
   container: {
@@ -81,6 +82,8 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth(); // Destructure the login function from useAuth
+
 
   // Function to handle login submission
   const handleLogin = async (e) => {
@@ -88,24 +91,24 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // Send login request to the server
       const response = await axios.post('/login', {
         username,
         password,
       });
 
-      // Check if login was successful
+      // Check if login was successful before calling the login function
       if (response.status === 200) {
-        // Store the token in localStorage
-        localStorage.setItem('token', response.data.token);
-        // Redirect the user to the home page
-        navigate('/home');
+        login({ token: response.data.token, username }); // Update app state
+
+        localStorage.setItem('token', response.data.token); // Optionally store the token
+        navigate('/home'); // Redirect on successful login
+      } else {
+        // Handle unsuccessful login attempt
+        setError('Login failed. Please try again.');
       }
     } catch (error) {
-      // Handle login error
-      setError(error.response?.data || 'An error occurred. Please try again.');
+      setError(error.response?.data?.message || 'An error occurred during login.');
     } finally {
-      // Reset loading state
       setLoading(false);
     }
   };
