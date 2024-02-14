@@ -1,3 +1,5 @@
+// Backend - index.js
+
 const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
@@ -7,14 +9,14 @@ const { connectToDatabase } = require('./Database/database');
 const artistRoutes = require('./Controllers/artistsController');
 const albumRoutes = require('./Controllers/albumController');
 const trackRoutes = require('./Controllers/tracksController');
-const { registerUser, loginUser } = require('./Handlers/AuthHandler');
+const { registerUser, loginUser } = require('./Handlers/authHandler');
 const authenticateToken = require('./middleware/authenticateToken');
-const { postReview, fetchUserReviews, updateReview, deleteReview } = require('./Handlers/ReviewHandler');
+const { postReview, fetchUserReviews, updateReview, deleteReview } = require('./Handlers/reviewHandler');
+const { addLikedSong,fetchLikedSongs,deleteLikedSong  } = require('./Handlers/likedSongsHandler'); // Update import
 
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 4000;
-
 
 app.use(cors());
 app.use(express.json());
@@ -24,18 +26,20 @@ app.use(morgan('dev'));
 connectToDatabase()
   .then(async () => {
     // Set up routes
-
     app.post('/register', registerUser);
-app.post('/login', loginUser);
+    app.post('/login', loginUser);
 
-// Ensure these routes are added within the async function where you set up your server after connecting to the database
-app.post('/reviews', authenticateToken, postReview);
-app.get('/user/reviews', authenticateToken, fetchUserReviews);
+    // Review routes
+    app.post('/reviews', authenticateToken, postReview);
+    app.get('/user/reviews', authenticateToken, fetchUserReviews);
+    app.put('/reviews/:id', authenticateToken, updateReview);
+    app.delete('/reviews/:id', authenticateToken, deleteReview);
 
-app.put('/reviews/:id', authenticateToken, updateReview); // Make sure updateReview is defined and exported
-app.delete('/reviews/:id', authenticateToken, deleteReview); // Make sure deleteReview is defined and exported
-
-   
+    // Liked songs routes
+    app.post('/liked-songs', authenticateToken, addLikedSong);
+    app.get('/user/liked-songs', authenticateToken, fetchLikedSongs); // Make sure to include fetchLikedSongs
+    app.delete('/liked-songs/:id', authenticateToken, deleteLikedSong );
+    // Mount other routes
     app.use('/artists', artistRoutes);
     app.use('/albums', albumRoutes);
     app.use('/tracks', trackRoutes);

@@ -14,6 +14,9 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  linkContainer: {
+    display: 'flex',
+  },
   link: {
     textDecoration: 'none',
     color: 'white',
@@ -46,10 +49,15 @@ const NavBar = () => {
 
   return (
     <div style={styles.container}>
-      <div>
-        <Link to="/user/reviews" style={styles.link}>
-          Reviews
-        </Link>
+      <div style={styles.linkContainer}>
+        {isLoggedIn && (
+          <>
+            <Link to="/user/reviews" style={styles.link}>
+              Reviews
+            </Link>
+            <Link to="/liked-songs" style={styles.link}>Liked Songs</Link> {/* Add this line */}
+          </>
+        )}
       </div>
       <div>
         {isLoggedIn && <div style={styles.username}>{username}</div>}

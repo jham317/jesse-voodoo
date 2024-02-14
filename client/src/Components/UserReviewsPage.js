@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate,Link } from 'react-router-dom'; // Import useNavigate
 
 const styles = {
     container: {
@@ -106,13 +106,12 @@ function UserReviewsPage() {
       }, []); // Empty dependency array ensures this effect only runs once on component mount
     
 
-    const fetchReviews = async () => {
+      const fetchReviews = useCallback(async () => {
         const token = localStorage.getItem('token');
         if (!token) {
             console.error("User not logged in");
             return;
         }
-
         try {
             const response = await axios.get('http://localhost:4000/user/reviews', {
                 headers: { Authorization: `Bearer ${token}` },
@@ -126,7 +125,7 @@ function UserReviewsPage() {
                     albumDetails: albumDetailsResponse.data,
                 };
             }));
-
+    
             // Sort reviews
             const sortedReviews = reviewsWithDetails.sort((a, b) => {
                 if (sortBy === 'rating') {
@@ -140,27 +139,27 @@ function UserReviewsPage() {
                 }
                 return 0;
             });
-
+    
             // Set reviews with adjusted rankings
             setReviews(sortedReviews);
-
+    
             // Reset rankings for the selected year
             const filteredReviews = sortedReviews.filter(review => selectedYear === 'All' || new Date(review.albumDetails.release_date).getFullYear().toString() === selectedYear);
             const resetRankedReviews = filteredReviews.map((review, index) => ({ ...review, rank: index + 1 }));
             setReviews(resetRankedReviews);
-
+    
             // Extract years for filter options
             const extractedYears = reviewsWithDetails.map(review => new Date(review.albumDetails.release_date).getFullYear());
             setYears([...new Set(extractedYears)].sort((a, b) => b - a));
         } catch (error) {
             console.error("Failed to fetch reviews:", error);
         }
-    };
+    }, [selectedYear, sortBy]);
 
     useEffect(() => {
         fetchReviews();
-    }, [selectedYear, sortBy]);
-
+    }, [selectedYear, sortBy, fetchReviews]);
+    
     const handleSortChange = (event) => {
         setSortBy(event.target.value);
     };
@@ -240,86 +239,87 @@ function UserReviewsPage() {
               Login
             </button>
           )}
-    
-            <h2 style={styles.heading}>My Reviews</h2>
-            <div style={styles.filterContainer}>
-                <label style={styles.formLabel}>Filter by year: </label>
-                <select style={styles.select} value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
-                    <option value="All">All Years</option>
-                    {years.map(year => (
-                        <option key={year} value={year}>{year}</option>
-                    ))}
-                </select>
-            </div>
-    
-            <div style={styles.filterContainer}>
-                <label style={styles.formLabel}>Sort by: </label>
-                <select style={styles.select} value={sortBy} onChange={handleSortChange}>
-                    <option value="rating">Highest Rating</option>
-                    <option value="date">Date Reviewed</option>
-                </select>
-            </div>
-    
-            <div style={styles.grid}>
-                {reviews.map((review) => (
-                    <div key={review._id} style={styles.reviewCard}>
-                        <span style={styles.rank}>Rank: {review.rank}</span>
-                        <div style={styles.reviewTextContainer}>
-                            {review.albumDetails.images[0] && (
-                                <img src={review.albumDetails.images[0].url} alt="Album cover" style={{ width: '100%', borderRadius: '5px', marginBottom: '10px' }} />
-                            )}
-                                                        <p style={styles.reviewText}>Date Reviewed: {new Date(review.createdAt).toLocaleDateString()}</p>
-
-                            <h3 style={styles.reviewText}>{review.albumDetails.name} by {review.albumDetails.artists.map(artist => artist.name).join(', ')}</h3>
-                            <p style={styles.reviewText}>Rating: {review.rating} - {review.strength}</p>
-                            <p style={styles.reviewText}>
-                                {review.showMore ? review.reviewText : `${review.reviewText.substring(0, 100)}`}
-                                {review.reviewText.length > 100 && (
-                                    <button onClick={() => review.showMore ? handleSeeLessClick(review._id) : handleSeeMoreClick(review._id)} style={styles.button}>
-                                        {review.showMore ? 'See Less' : 'See More'}
-                                        
-                                    </button>
-                                )}
-                            </p>
-                            {editReviewId === review._id && (
-                                <form onSubmit={handleSaveClick}>
-                                    <input
-                                        type="text"
-                                        name="rating"
-                                        value={editFormData.rating}
-                                        onChange={handleEditFormChange}
-                                        style={styles.formInput}
-                                    />
-                                    <textarea
-                                        name="reviewText"
-                                        value={editFormData.reviewText}
-                                        onChange={handleEditFormChange}
-                                        style={styles.textArea}
-                                    />
-                                    <select
-                                        name="strength"
-                                        value={editFormData.strength}
-                                        onChange={handleEditFormChange}
-                                        style={styles.formInput}
-                                    >
-                                        <option value="light">Light</option>
-                                        <option value="mid">Mid</option>
-                                        <option value="strong">Strong</option>
-                                    </select>
-                                    <button type="submit">Save</button>
-                                    <button type="button" onClick={handleCancelClick}>Cancel</button>
-                                </form>
-                            )}
-                        </div>
-                        <div style={styles.buttonContainer}>
-                            <button onClick={() => handleEditClick(review)} style={styles.button}>Edit</button>
-                            <button onClick={() => handleDeleteClick(review._id)} style={styles.button}>Delete</button>
-                        </div>
-                    </div>
-                ))}
-            </div>
+      
+          <h2 style={styles.heading}>My Reviews</h2>
+          <div style={styles.filterContainer}>
+            <label style={styles.formLabel}>Filter by year: </label>
+            <select style={styles.select} value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
+              <option value="All">All Years</option>
+              {years.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
+      
+          <div style={styles.filterContainer}>
+            <label style={styles.formLabel}>Sort by: </label>
+            <select style={styles.select} value={sortBy} onChange={handleSortChange}>
+              <option value="rating">Highest Rating</option>
+              <option value="date">Date Reviewed</option>
+            </select>
+          </div>
+      
+          <div style={styles.grid}>
+            {reviews.map((review) => (
+              <div key={review._id} style={styles.reviewCard}>
+                <span style={styles.rank}>Rank: {review.rank}</span>
+                <div style={styles.reviewTextContainer}>
+                  {/* Link the album image to the AlbumPage */}
+                  <Link to={`/album/${review.albumDetails.id}`}>
+                    {review.albumDetails.images[0] && (
+                      <img src={review.albumDetails.images[0].url} alt="Album cover" style={{ width: '100%', borderRadius: '5px', marginBottom: '10px' }} />
+                    )}
+                  </Link>
+                  <p style={styles.reviewText}>Date Reviewed: {new Date(review.createdAt).toLocaleDateString()}</p>
+                  <h3 style={styles.reviewText}>{review.albumDetails.name} by {review.albumDetails.artists.map(artist => artist.name).join(', ')}</h3>
+                  <p style={styles.reviewText}>Rating: {review.rating} - {review.strength}</p>
+                  <p style={styles.reviewText}>
+                    {review.showMore ? review.reviewText : `${review.reviewText.substring(0, 100)}`}
+                    {review.reviewText.length > 100 && (
+                      <button onClick={() => review.showMore ? handleSeeLessClick(review._id) : handleSeeMoreClick(review._id)} style={styles.button}>
+                        {review.showMore ? 'See Less' : 'See More'}
+                      </button>
+                    )}
+                  </p>
+                  {editReviewId === review._id && (
+                    <form onSubmit={handleSaveClick}>
+                      <input
+                        type="text"
+                        name="rating"
+                        value={editFormData.rating}
+                        onChange={handleEditFormChange}
+                        style={styles.formInput}
+                      />
+                      <textarea
+                        name="reviewText"
+                        value={editFormData.reviewText}
+                        onChange={handleEditFormChange}
+                        style={styles.textArea}
+                      />
+                      <select
+                        name="strength"
+                        value={editFormData.strength}
+                        onChange={handleEditFormChange}
+                        style={styles.formInput}
+                      >
+                        <option value="light">Light</option>
+                        <option value="mid">Mid</option>
+                        <option value="strong">Strong</option>
+                      </select>
+                      <button type="submit">Save</button>
+                      <button type="button" onClick={handleCancelClick}>Cancel</button>
+                    </form>
+                  )}
+                </div>
+                <div style={styles.buttonContainer}>
+                  <button onClick={() => handleEditClick(review)} style={styles.button}>Edit</button>
+                  <button onClick={() => handleDeleteClick(review._id)} style={styles.button}>Delete</button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-    );
+      );
 }
 
 export default UserReviewsPage;
